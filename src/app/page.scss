@@ -1,0 +1,93 @@
+button {
+    &.b-submit {
+        background: #245462;
+        &:active {
+            background: #1a3d47;
+        }
+    }
+    &.b-reset {
+        background: #d5e7e4;
+        &:active {
+            background: #b4cfcb;
+        }
+    }
+}
+
+main {
+    background: url('./../../public/images/bg.jpg') center center;
+    background-size: cover;
+    &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        bottom: -15%;
+        width: 824px;
+        aspect-ratio: 250/197;
+        background: url('./../../public/images/bg-spring.svg') 100% 100%;
+        background-size: contain;
+        background-repeat: no-repeat;
+        z-index: 0;
+    }
+}
+
+.inputFild {
+    grid-template-columns: 1fr auto;
+    input {
+        max-width: 468px;
+        background: #fefefe;
+        &::placeholder {
+            color: #64748b;
+        }
+        &:focus {
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) #245462;
+        }
+    }
+}
+
+
+.balloon {
+    font-family: 'OngleipRyudung';
+    background: #d5e7e4;
+    border-radius: 42% 58% 57% 43% / 49% 37% 63% 51%;
+    color: #245462;
+    &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: -1;
+        border: 1px solid #d5e7e4;
+        border-radius: 42% 58% 57% 43% / 49% 37% 63% 51%;
+        transform: rotate(307deg);
+        background:transparent;
+    }
+    &::after {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        border: 1px solid #fff;
+        border-radius: 42% 58% 57% 43% / 49% 37% 63% 51%;
+        transform: scale(0.92) rotate(37deg);
+        background:transparent;
+    }
+}
+
+
+@media screen and (max-width: 640px) {
+    .inputFild {
+        input {
+            max-width: 100%;
+            &::placeholder {
+                font-size: 15px;
+            }
+        }
+    }
+}
