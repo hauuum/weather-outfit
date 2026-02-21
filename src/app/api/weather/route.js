@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import axios from 'axios';
 import { SEOUL_GU_LIST, SEOUL_GU_GRID } from '@/constants/seoul';
 
 const normalize = (str) => str.replace('구', '').trim();
@@ -14,7 +13,6 @@ function getBaseDateTime() {
   const kstOffset = 9 * 60 * 60 * 1000;
   const kst = new Date(now.getTime() + kstOffset);
 
-  // 10분 미만이면 이전 시각 사용 (데이터 미생성 방지)
   if (kst.getUTCMinutes() < 10) {
     kst.setUTCHours(kst.getUTCHours() - 1);
   }
@@ -87,9 +85,7 @@ export async function GET(request) {
     const { base_date, base_time } = getBaseDateTime();
     console.log(`[KMA 요청] gu=${validGu} nx=${grid.nx} ny=${grid.ny} date=${base_date} time=${base_time}`);
 
-    // ── 핵심 수정: serviceKey 이중 인코딩 방지 ──────────────────
-    // axios params 사용 시 serviceKey가 이중 인코딩되어 인증 실패(500) 발생.
-    // decodeURIComponent로 디코딩 후 URL 문자열에 직접 삽입합니다.
+    // serviceKey 이중 인코딩 방지 — URL에 직접 삽입
     const decodedKey = decodeURIComponent(apiKey);
     const endpoint   = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst';
     const qs = [
@@ -103,10 +99,18 @@ export async function GET(request) {
       `ny=${grid.ny}`,
     ].join('&');
 
-    const response = await axios.get(`${endpoint}?${qs}`, { timeout: 8000 });
+    const res = await fetch(`${endpoint}?${qs}`, {
+      signal: AbortSignal.timeout(8000),
+    });
 
-    const resultCode = response.data?.response?.header?.resultCode;
-    const resultMsg  = response.data?.response?.header?.resultMsg ?? '';
+    if (!res.ok) {
+      throw new Error(`기상청 서버 오류: HTTP ${res.status}`);
+    }
+
+    const json = await res.json();
+
+    const resultCode = json?.response?.header?.resultCode;
+    const resultMsg  = json?.response?.header?.resultMsg ?? '';
     console.log(`[KMA 응답] code=${resultCode} msg=${resultMsg}`);
 
     if (resultCode !== '00') {
@@ -117,7 +121,7 @@ export async function GET(request) {
       );
     }
 
-    const items = response.data?.response?.body?.items?.item ?? [];
+    const items = json?.response?.body?.items?.item ?? [];
     if (items.length === 0) {
       return NextResponse.json(
         { error: '기상청 API에서 데이터를 받아오지 못했습니다.' },
@@ -151,9 +155,8 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('[weather error]', error.message);
-    console.error('[상세]', error.response?.status, JSON.stringify(error.response?.data));
 
-    if (error.code === 'ECONNABORTED') {
+    if (error.name === 'TimeoutError' || error.name === 'AbortError') {
       return NextResponse.json(
         { error: '기상청 API 응답 시간이 초과되었습니다.' },
         { status: 504 }
