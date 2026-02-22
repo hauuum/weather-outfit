@@ -35,7 +35,7 @@ export async function GET(request) {
 
     const res = await fetch(url, {
       headers: { Authorization: apiKey },
-      signal:  AbortSignal.timeout(4000),
+      signal:  AbortSignal.timeout(2000),
     });
 
     if (!res.ok) {
