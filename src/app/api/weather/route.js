@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { SEOUL_GU_LIST, SEOUL_GU_GRID } from '@/constants/seoul';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const normalize = (str) => str.replace('구', '').trim();
 
 // ─────────────────────────────────────────────────────────────
