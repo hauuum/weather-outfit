@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SEOUL_GU_LIST, SEOUL_GU_GRID } from '@/constants/seoul';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const normalize = (str) => str.replace('구', '').trim();
 
 // ─────────────────────────────────────────────────────────────
@@ -143,18 +140,20 @@ export async function GET(request) {
 
     console.log(`[KMA 파싱] T1H=${t1h} REH=${reh} WSD=${wsd} PTY=${pty} RN1=${rn1}`);
 
-    return NextResponse.json({
-      cityName:      `서울시 ${validGu}`,
-      temp:          t1h !== null ? parseFloat(Number(t1h).toFixed(1)) : null,
-      humidity:      reh !== null ? Number(reh) : null,
-      windSpeed:     wsd !== null ? parseFloat(Number(wsd).toFixed(1)) : null,
-      ptyCode:       pty !== null ? Number(pty) : 0,
-      ptyLabel:      getPtyLabel(pty ?? 0),
-      precipitation: rn1,
-      description:   getWeatherDescription(pty ?? 0, t1h ?? 15),
-      baseDate:      base_date,
-      baseTime:      base_time,
-    });
+    return NextResponse.json(
+      {
+        cityName:      `서울시 ${validGu}`,
+        temp:          t1h !== null ? parseFloat(Number(t1h).toFixed(1)) : null,
+        humidity:      reh !== null ? Number(reh) : null,
+        windSpeed:     wsd !== null ? parseFloat(Number(wsd).toFixed(1)) : null,
+        ptyCode:       pty !== null ? Number(pty) : 0,
+        ptyLabel:      getPtyLabel(pty ?? 0),
+        precipitation: rn1,
+        description:   getWeatherDescription(pty ?? 0, t1h ?? 15),
+        baseDate:      base_date,
+        baseTime:      base_time,
+      },
+    );
 
   } catch (error) {
     console.error('[weather error]', error.message);
